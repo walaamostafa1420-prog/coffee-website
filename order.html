@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Coffee</title>
+    <link rel="stylesheet" href="coffee.css">
+</head>
+<body>
+
+<header>
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo">
+            <h2 class="logo-text">&#9749; Coffee</h2>
+        </a>
+    </nav>
+</header>
+
+<section class="contact-section" style="padding-top:120px;">
+    <h2 class="section-title">Order Now</h2>
+
+    <div class="section-content">
+
+        <form class="contact-form">
+
+            <input type="text" class="form-input" placeholder="Your Name" required>
+
+            <input type="email" class="form-input" placeholder="Your Email" required>
+
+            <input type="tel" class="form-input" placeholder="Phone Number" required>
+
+            <select class="form-input" required>
+                <option value="">Choose Your Coffee</option>
+                <option>Espresso</option>
+                <option>Cappuccino</option>
+                <option>Latte</option>
+                <option>Americano</option>
+                <option>Mocha</option>
+            </select>
+
+            <select class="form-input" required>
+                <option value="">Choose Size</option>
+                <option>Small</option>
+                <option>Medium</option>
+                <option>Large</option>
+            </select>
+
+            <input type="number" class="form-input" placeholder="Quantity" min="1" required>
+
+            <textarea class="form-input" placeholder="Additional Notes"></textarea>
+
+            <button type="submit" class="submit-button">
+                Place Order
+            </button>
+
+        </form>
+
+    </div>
+</section>
+
+<footer class="footer-section">
+    <div class="section-content">
+        <p class="copyright-text">
+            &#169; 2024 Coffee Shop
+        </p>
+
+        <div class="social-link-list">
+            <a href="https://facebook.com" class="social-link">Facebook</a>
+            <a href="https://instagram.com" class="social-link">Instagram</a>
+            <a href="https://twitter.com" class="social-link">Twitter</a>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
