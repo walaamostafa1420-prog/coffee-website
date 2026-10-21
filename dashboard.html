@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roast & Ritual | POS Dashboard</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root {
+  --bg:#100b08;
+  --sidebar:#180f0b;
+  --panel:#21150f;
+  --panel2:#291a12;
+  --border:#3a261a;
+  --orange:#f3961c;
+  --gold:#e9bd4d;
+  --text:#f8efe6;
+  --muted:#a18c7a;
+  --green:#75bd8b;
+  --red:#dc8069;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif;font-size:13px}
+button,input,select{font:inherit}
+.sidebar{position:fixed;inset:0 auto 0 0;width:220px;background:var(--sidebar);border-right:1px solid var(--border);padding:24px 15px;display:flex;flex-direction:column;z-index:1000;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:10px;margin:0 5px 35px}
+.brand-icon{width:39px;height:39px;border-radius:13px;background:var(--orange);display:grid;place-items:center;color:#241307;font-size:18px}
+.brand h3{font-size:17px;margin:0;font-weight:800}
+.brand small{display:block;color:var(--muted);font-size:9px;margin-top:4px}
+.nav-label{font-size:9px;color:#826b59;letter-spacing:1.5px;margin:18px 10px 10px}
+.side-nav{display:grid;gap:5px}
+.side-nav button{border:0;background:transparent;color:#bba999;text-align:left;padding:12px 11px;border-radius:9px;display:flex;align-items:center;gap:12px;font-size:12px}
+.side-nav button i{width:17px;text-align:center}
+.side-nav button:hover,.side-nav button.active{background:var(--orange);color:#241307;font-weight:bold}
+.side-bottom{margin-top:auto;padding:17px 5px 0;border-top:1px solid var(--border);color:var(--muted);font-size:11px}
+.main{margin-left:220px;min-width:0}
+.topbar{height:65px;padding:12px 25px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#150e0a;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
+.top-links{display:flex;align-items:center;gap:17px}
+.top-links button{background:transparent;border:0;color:#a99482;font-size:11px}
+.top-links button.active{color:var(--orange)}
+.top-actions{display:flex;align-items:center;gap:10px}
+.search{width:185px;background:#241810;border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:white;font-size:11px}
+.search::placeholder{color:#907966}
+.search:focus,.form-control:focus,.form-select:focus{background:#241810;color:white;border-color:var(--orange);box-shadow:0 0 0 2px #f3961c20}
+.icon-btn{width:33px;height:33px;border:1px solid var(--border);background:#241810;color:#d7c2ae;border-radius:9px}
+.user-avatar{width:33px;height:33px;border-radius:50%;background:#765039;display:grid;place-items:center;font-weight:bold}
+.content{padding:25px;max-width:1600px;margin:auto}
+.page{display:none}
+.page.active{display:block}
+.page-heading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:23px}
+.page-heading h1{font-size:25px;font-weight:750;margin:0 0 7px}
+.page-heading p{font-size:11px;color:var(--muted);margin:0}
+.eyebrow{color:var(--orange);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.primary{background:var(--orange);color:#241307;border:0;border-radius:8px;padding:10px 13px;font-size:11px;font-weight:bold}
+.primary:hover{background:#ffc263}
+.secondary{background:#2b1b12;color:#e4cdb8;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:11px}
+.panel,.stat-card{background:var(--panel);border:1px solid var(--border);border-radius:13px;padding:17px;height:100%;min-width:0}
+.panel-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}
+.panel-title{font-size:13px;font-weight:700;margin:0}
+.panel-subtitle{font-size:10px;color:var(--muted);margin-top:5px}
+.stat-label{font-size:10px;color:var(--muted)}
+.stat-icon{width:32px;height:32px;display:grid;place-items:center;background:#382316;color:var(--orange);border-radius:9px}
+.stat-value{font-size:25px;font-weight:750;margin:13px 0 5px;letter-spacing:-.5px}
+.stat-bottom{display:flex;justify-content:space-between;align-items:center;font-size:9px;color:var(--muted)}
+.positive{color:var(--green)}
+.negative{color:var(--red)}
+.chart-box{height:220px;position:relative}
+.chart-box.small{height:180px}
+.feature-panel{background:linear-gradient(145deg,#3c2515,#21140d);border:1px solid #62401e;border-radius:13px;padding:18px;height:100%}
+.feature-panel h3{font-size:18px;line-height:1.35;margin:14px 0 8px}
+.feature-panel p{font-size:10px;color:#bfa894;line-height:1.7}
+.feature-tag{font-size:9px;color:var(--orange);text-transform:uppercase;letter-spacing:1px}
+.ai-input{display:flex;gap:6px;margin-top:16px}
+.ai-input input{min-width:0;flex:1;background:#1b100b;border:1px solid #51341f;border-radius:7px;padding:9px;color:white;font-size:10px}
+.ai-input button{background:var(--orange);border:0;border-radius:7px;padding:0 11px}
+.mini-metric{background:#2b1a11;border:1px solid #432a19;padding:13px;border-radius:11px}
+.mini-metric .value{font-size:23px;font-weight:750;margin-top:7px}
+.mini-metric small{color:var(--muted);font-size:9px}
+.table-shell{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.table{margin:0;white-space:nowrap;--bs-table-bg:transparent;--bs-table-color:#e6d7c8;--bs-table-border-color:#38251a}
+.table thead th{font-size:9px;color:#a58c77;letter-spacing:.7px;padding:12px;background:#281a12;border:0}
+.table tbody td{font-size:10px;padding:12px;vertical-align:middle}
+.table tbody tr:hover{background:#2a1b12}
+.customer-cell{display:flex;align-items:center;gap:8px}
+.avatar{width:28px;height:28px;display:grid;place-items:center;border-radius:50%;background:#51331f;color:#f5c17c;font-size:9px;font-weight:bold}
+.status{display:inline-block;padding:5px 8px;border-radius:20px;font-size:9px;background:#203a28;color:#8ed6a2}
+.status.waiting{background:#48321a;color:#f2c16f}
+.status.declined{background:#48231c;color:#e9927d}
+.status.inactive{background:#3a3028;color:#c4a992}
+.filter{background:#25180f;border:1px solid var(--border);color:#e9d8c8;border-radius:8px;padding:9px;font-size:10px}
+.form-control,.form-select{background:#241810;color:#eee;border-color:var(--border);font-size:11px}
+.product-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;height:100%}
+.product-card img{width:100%;height:130px;object-fit:cover;background:#352216}
+.product-info{padding:13px}
+.product-info h3{font-size:12px;font-weight:bold}
+.product-info p{font-size:10px;color:var(--muted)}
+.product-price{font-size:14px;color:var(--orange);font-weight:bold}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.calendar-day{min-height:70px;border:1px solid var(--border);border-radius:7px;padding:8px;font-size:10px;background:#1c120d}
+.calendar-day.today{border-color:var(--orange);background:#392413}
+.calendar-day .event{background:#57351c;color:#f8c77f;border-radius:4px;padding:4px;margin-top:7px;font-size:8px}
+.progress{height:6px;background:#422b1c}
+.progress-bar{background:var(--orange)}
+footer{text-align:center;color:#806d5c;font-size:9px;padding:25px 0 5px}
+@media(max-width:1000px){.sidebar{width:190px}.main{margin-left:190px}.content{padding:18px}.topbar{padding:10px 15px}.top-links{gap:8px}.search{width:140px}}
+@media(max-width:760px){.sidebar{position:fixed;transform:translateX(-100%);width:235px;transition:.25s}.sidebar.show{transform:translateX(0)}.main{margin-left:0}.menu-toggle{display:inline-grid!important}.mobile-overlay.show{display:block;position:fixed;inset:0;background:#0009;z-index:900}.top-links{display:none}.content{padding:15px 11px}.topbar{padding:10px}.search{width:125px}.page-heading{align-items:flex-start;flex-direction:column}.page-heading h1{font-size:22px}.stat-value{font-size:21px}.panel{padding:13px}.chart-box{height:200px}}
+</style>
+</head>
+
+<body>
+<div class="mobile-overlay" id="overlay"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-icon"><i class="fa-solid fa-mug-hot"></i></div>
+    <div><h3>Roast & Ritual</h3><small>POINT OF SALE</small></div>
+  </div>
+
+  <div class="nav-label">MAIN MENU</div>
+  <nav class="side-nav">
+    <button class="active" data-page="dashboard"><i class="fa-solid fa-house"></i> Dashboard</button>
+    <button data-page="analytics"><i class="fa-solid fa-chart-line"></i> Analytics</button>
+    <button data-page="invoices"><i class="fa-solid fa-file-invoice"></i> Invoices</button>
+    <button data-page="calendar"><i class="fa-regular fa-calendar"></i> Calendar</button>
+    <button data-page="products"><i class="fa-solid fa-mug-saucer"></i> Products</button>
+  </nav>
+
+  <div class="nav-label">MANAGEMENT</div>
+  <nav class="side-nav">
+    <button data-page="customers"><i class="fa-solid fa-users"></i> Customers</button>
+    <button data-page="staff"><i class="fa-solid fa-user-group"></i> Staff</button>
+    <button data-page="settings"><i class="fa-solid fa-gear"></i> Settings</button>
+  </nav>
+
+  <div class="side-bottom">
+    <i class="fa-solid fa-circle-check me-2" style="color:var(--green)"></i> Store system online
+  </div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+  <div class="d-flex align-items-center gap-3">
+    <button class="icon-btn menu-toggle d-none" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
+    <div><div style="font-size:9px;color:var(--muted)">ROAST & RITUAL / <span id="breadcrumb">DASHBOARD</span></div><div class="fw-bold mt-1" id="topTitle">Point of Sales Overview</div></div>
+  </div>
+  <div class="top-links">
+    <button class="active" data-page="dashboard">Dashboard</button>
+    <button data-page="analytics">Analytics</button>
+    <button data-page="invoices">Invoices</button>
+    <button data-page="calendar">Calendar</button>
+    <button data-page="products">Products</button>
+  </div>
+  <div class="top-actions">
+    <input class="search" id="searchInput" placeholder="Search this page...">
+    <button class="icon-btn" id="notificationBtn"><i class="fa-regular fa-bell"></i></button>
+    <div class="user-avatar">RR</div>
+  </div>
+</header>
+
+<div class="content">
+
+<section class="page active" id="dashboard">
+  <div class="page-heading">
+    <div><div class="eyebrow">MONDAY · YOUR DAILY BREW</div><h1>Point of Sales Overview</h1><p>Your coffee shop at a glance. Good things are brewing.</p></div>
+    <button class="primary" data-page="invoices"><i class="fa-solid fa-plus me-2"></i>New invoice</button>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-xl-3"><div class="stat-card"><div class="d-flex justify-content-between"><span class="stat-label">Total revenue</span><span class="stat-icon"><i class="fa-solid fa-wallet"></i></span></div><div class="stat-value" id="revenueValue">EGP 45,462</div><div class="stat-bottom"><span class="positive">↑ 12.4%</span><span>vs last month</span></div></div></div>
+    <div class="col-6 col-xl-3"><div class="stat-card"><div class="d-flex justify-content-between"><span class="stat-label">Total orders</span><span class="stat-icon"><i class="fa-solid fa-receipt"></i></span></div><div class="stat-value" id="ordersValue">3,048</div><div class="stat-bottom"><span class="positive">↑ 8.2%</span><span>vs last month</span></div></div></div>
+    <div class="col-6 col-xl-3"><div class="stat-card"><div class="d-flex justify-content-between"><span class="stat-label">Products sold</span><span class="stat-icon"><i class="fa-solid fa-box"></i></span></div><div class="stat-value">7,046</div><div class="stat-bottom"><span class="positive">↑ 10.6%</span><span>vs last month</span></div></div></div>
+    <div class="col-6 col-xl-3"><div class="stat-card"><div class="d-flex justify-content-between"><span class="stat-label">Refunds</span><span class="stat-icon"><i class="fa-solid fa-arrow-rotate-left"></i></span></div><div class="stat-value">21</div><div class="stat-bottom"><span class="negative">↓ 2.1%</span><span>vs last month</span></div></div></div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-xl-7">
+      <div class="panel">
+        <div class="panel-heading"><div><h2 class="panel-title">Tracking our sales</h2><p class="panel-subtitle">Revenue performance throughout the week</p></div><select class="filter" id="salesPeriod"><option>Weekly</option><option>Monthly</option></select></div>
+        <div class="chart-box"><canvas id="salesChart"></canvas></div>
+      </div>
+    </div>
+    <div class="col-xl-5">
+      <div class="panel">
+        <div class="panel-heading"><div><h2 class="panel-title">Popular items</h2><p class="panel-subtitle">The favorites customers keep coming back for.</p></div><button class="secondary" data-page="products">View all</button></div>
+        <div class="chart-box"><canvas id="popularChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-xl-7">
+      <div class="panel">
+        <div class="panel-heading"><div><h2 class="panel-title">Market demand</h2><p class="panel-subtitle">Customer demand across categories</p></div><span class="positive" style="font-size:10px">Live overview</span></div>
+        <div class="row g-3">
+          <div class="col-6"><div class="mini-metric"><small>Most popular category</small><div class="value">Coffee</div><div class="positive mt-2" style="font-size:10px">55% of sales</div></div></div>
+          <div class="col-6"><div class="mini-metric"><small>Average order value</small><div class="value">EGP 149</div><div class="positive mt-2" style="font-size:10px">↑ 7.8%</div></div></div>
+        </div>
+        <div class="mt-4"><div class="d-flex justify-content-between mb-2"><span style="font-size:10px">Hot beverages</span><span style="font-size:10px">55%</span></div><div class="progress"><div class="progress-bar" style="width:55%"></div></div></div>
+        <div class="mt-3"><div class="d-flex justify-content-between mb-2"><span style="font-size:10px">Cold drinks</span><span style="font-size:10px">30%</span></div><div class="progress"><div class="progress-bar" style="width:30%"></div></div></div>
+        <div class="mt-3"><div class="d-flex justify-content-between mb-2"><span style="font-size:10px">Food & desserts</span><span style="font-size:10px">15%</span></div><div class="progress"><div class="progress-bar" style="width:15%"></div></div></div>
+      </div>
+    </div>
+    <div class="col-xl-5">
+      <div class="feature-panel">
+        <div class="feature-tag"><i class="fa-solid fa-wand-magic-sparkles me-1"></i> Smart assistant</div>
+        <h3>Can I help you?</h3>
+        <p>Ask about sales, best sellers, or your latest invoices.</p>
+        <div class="d-grid gap-2">
+          <button class="secondary text-start" onclick="askAssistant('sales')"><i class="fa-solid fa-chart-simple me-2"></i>Sales report</button>
+          <button class="secondary text-start" onclick="askAssistant('products')"><i class="fa-solid fa-mug-hot me-2"></i>Top selling products</button>
+          <button class="secondary text-start" onclick="askAssistant('orders')"><i class="fa-solid fa-receipt me-2"></i>Recent invoices</button>
+        </div>
+        <div class="ai-input"><input id="assistantInput" placeholder="Ask something..."><button onclick="askAssistant()"><i class="fa-solid fa-arrow-up"></i></button></div>
+        <div id="assistantAnswer" style="font-size:10px;color:#e7bd87;margin-top:10px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-heading"><div><h2 class="panel-title">Recent invoices</h2><p class="panel-subtitle">A quick look at recent customer transactions.</p></div><button class="secondary" data-page="invoices">All invoices <i class="fa-solid fa-arrow-right ms-1"></i></button></div>
+    <div class="table-responsive"><table class="table"><thead><tr><th>INVOICE</th><th>CUSTOMER</th><th>DATE</th><th>AMOUNT</th><th>STATUS</th></tr></thead><tbody id="recentInvoices"></tbody></table></div>
+  </div>
+</section>
+
+<section class="page" id="analytics">
+  <div class="page-heading"><div><div class="eyebrow">YOUR NUMBERS, BEAUTIFULLY BREWED</div><h1>Sales Analytics</h1><p>Explore revenue, customer demand and product performance.</p></div><button class="primary" onclick="exportInvoices()">Export report</button></div>
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-label">Total revenue</div><div class="stat-value" id="analyticsRevenueValue">EGP 45,462</div><div class="positive" style="font-size:10px">↑ 12.4%</div></div></div>
+    <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-label">Total invoices</div><div class="stat-value" id="analyticsOrders">3,048</div><div class="positive" style="font-size:10px">↑ 8.2%</div></div></div>
+    <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-label">Items sold</div><div class="stat-value">7,046</div><div class="positive" style="font-size:10px">↑ 10.6%</div></div></div>
+    <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-label">Refund rate</div><div class="stat-value">0.7%</div><div class="positive" style="font-size:10px">↓ 2.1%</div></div></div>
+  </div>
+  <div class="row g-3">
+    <div class="col-xl-8"><div class="panel"><div class="panel-heading"><div><h2 class="panel-title">Revenue trends</h2><p class="panel-subtitle">Monthly performance</p></div></div><div class="chart-box"><canvas id="analyticsChart"></canvas></div></div></div>
+    <div class="col-xl-4"><div class="panel"><h2 class="panel-title mb-3">Category breakdown</h2><div class="chart-box small"><canvas id="categoryChart"></canvas></div><div class="mt-3"><div class="d-flex justify-content-between mb-2"><span style="font-size:10px">Coffee</span><b style="font-size:10px">55%</b></div><div class="progress mb-3"><div class="progress-bar" style="width:55%"></div></div><div class="d-flex justify-content-between mb-2"><span style="font-size:10px">Cold drinks</span><b style="font-size:10px">30%</b></div><div class="progress mb-3"><div class="progress-bar" style="width:30%"></div></div><div class="d-flex justify-content-between mb-2"><span style="font-size:10px">Desserts</span><b style="font-size:10px">15%</b></div><div class="progress"><div class="progress-bar" style="width:15%"></div></div></div></div></div>
+  </div>
+</section>
+
+<!-- INVOICES -->
+<section class="page" id="invoices">
+  <div class="page-heading"><div><div class="eyebrow">EVERY TRANSACTION, IN ONE PLACE</div><h1>Invoices</h1><p>Manage payments and follow up on customer orders.</p></div><button class="primary" onclick="openInvoiceForm()"><i class="fa-solid fa-plus me-2"></i>New invoice</button></div>
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-label">All invoices</div><div class="stat-value" id="invoiceCount">4</div></div></div>
+    <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-label">Paid</div><div class="stat-value" id="paidCount">2</div></div></div>
+    <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-label">Waiting</div><div class="stat-value" id="waitingCount">1</div></div></div>
+    <div class="col-6 col-xl-3"><div class="stat-card"><div class="stat-label">Outstanding</div><div class="stat-value" id="outstanding">EGP 530</div></div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-heading"><div><h2 class="panel-title">Invoice management</h2><p class="panel-subtitle">Filter and manage invoice statuses.</p></div><button class="secondary" onclick="exportInvoices()">Export CSV</button></div>
+    <div class="row g-2 mb-3"><div class="col-md-7"><input class="form-control" id="invoiceSearch" placeholder="Search invoice or customer..."></div><div class="col-md-5"><select class="form-select" id="invoiceFilter"><option value="">All statuses</option><option>Waiting</option><option>Delivered</option><option>Declined</option></select></div></div>
+    <div class="table-responsive"><table class="table"><thead><tr><th>INVOICE</th><th>CUSTOMER</th><th>ITEM</th><th>DATE</th><th>AMOUNT</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody id="invoiceTable"></tbody></table></div>
+  </div>
+</section>
+
+<section class="page" id="calendar">
+  <div class="page-heading"><div><div class="eyebrow">PLAN A SMOOTH SERVICE</div><h1>Calendar</h1><p>Keep track of events, shifts and important shop dates.</p></div><button class="primary" onclick="addCalendarEvent()">Add event</button></div>
+  <div class="panel">
+    <div class="panel-heading"><button class="secondary" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button><h2 class="panel-title" id="calendarMonth">Calendar</h2><button class="secondary" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button></div>
+    <div class="calendar-grid mb-2" id="calendarWeekdays"></div>
+    <div class="calendar-grid" id="calendarDays"></div>
+  </div>
+  <div class="panel mt-3"><h2 class="panel-title mb-3">Upcoming reminders</h2><div id="eventList" style="font-size:11px;color:var(--muted)">No reminders added yet.</div></div>
+</section>
+
+<!-- PRODUCTS -->
+<section class="page" id="products">
+  <div class="page-heading"><div><div class="eyebrow">THE MENU THAT MAKES YOUR SHOP</div><h1>Products</h1><p>Manage coffee, drinks and food items.</p></div><button class="primary" onclick="addProduct()"> <i class="fa-solid fa-plus me-2"></i>Add product</button></div>
+  <div class="row g-2 mb-3"><div class="col-md-7"><input class="form-control" id="productSearch" placeholder="Search products..."></div><div class="col-md-5"><select class="form-select" id="productCategory"><option value="">All categories</option><option>Coffee</option><option>Cold Drinks</option><option>Food</option><option>Desserts</option></select></div></div>
+  <div class="row g-3" id="productGrid"></div>
+</section>
+
+<!-- CUSTOMERS -->
+<section class="page" id="customers">
+  <div class="page-heading"><div><div class="eyebrow">YOUR REGULARS MAKE THE RITUAL</div><h1>Customers</h1><p>Customer details and purchase history.</p></div><button class="primary" onclick="addCustomer()">Add customer</button></div>
+  <div class="panel"><div class="panel-heading"><h2 class="panel-title">Customer directory</h2><input class="form-control" style="max-width:220px" id="customerSearch" placeholder="Search customers..."></div>
+    <div class="table-responsive"><table class="table"><thead><tr><th>CUSTOMER</th><th>EMAIL</th><th>ORDERS</th><th>TOTAL SPENT</th><th>TYPE</th></tr></thead><tbody id="customerTable"></tbody></table></div>
+  </div>
+</section>
+
+<!-- STAFF -->
+<section class="page" id="staff">
+  <div class="page-heading"><div><div class="eyebrow">THE PEOPLE BEHIND EVERY CUP</div><h1>Staff management</h1><p>View your team and their current status.</p></div><button class="primary" onclick="alert('Demo action: connect a backend to add staff.')">Add staff member</button></div>
+  <div class="row g-3" id="staffGrid"></div>
+</section>
+
+<!-- SETTINGS -->
+<section class="page" id="settings">
+  <div class="page-heading"><div><div class="eyebrow">YOUR SHOP, YOUR WAY</div><h1>Settings</h1><p>Customize your store preferences.</p></div></div>
+  <div class="row g-3">
+    <div class="col-xl-7"><div class="panel"><h2 class="panel-title mb-4">Store information</h2>
+      <form id="settingsForm">
+        <label class="form-label">Store name</label><input class="form-control mb-3" id="storeName" value="Roast & Ritual">
+        <label class="form-label">Currency</label><select class="form-select mb-3" id="currency"><option value="EGP">Egyptian Pound (EGP)</option><option value="USD">US Dollar (USD)</option><option value="EUR">Euro (EUR)</option></select>
+        <label class="form-label">Store email</label><input class="form-control mb-4" id="storeEmail" type="email" value="hello@roastandritual.com">
+        <button class="primary">Save preferences</button><p id="settingsMessage" class="mt-3" style="color:var(--green);font-size:10px"></p>
+      </form>
+    </div></div>
+    <div class="col-xl-5"><div class="panel"><h2 class="panel-title mb-3">Dashboard preferences</h2>
+      <div class="mb-4"><div class="d-flex justify-content-between"><span>Order notifications</span><input type="checkbox" checked></div><small style="color:var(--muted)">Receive updates about new invoices.</small></div>
+      <div class="mb-4"><div class="d-flex justify-content-between"><span>Inventory alerts</span><input type="checkbox" checked></div><small style="color:var(--muted)">Keep an eye on available products.</small></div>
+      <div><div class="d-flex justify-content-between"><span>Weekly report</span><input type="checkbox"></div><small style="color:var(--muted)">Review sales performance each week.</small></div>
+    </div></div>
+  </div>
+</section>
+
+<footer>Roast & Ritual · Crafted for good coffee and better business</footer>
+</div>
+</main>
+
+<div class="modal fade" id="invoiceModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content" style="background:var(--panel);color:var(--text);border:1px solid var(--border)"><form id="invoiceForm"><div class="modal-header" style="border-color:var(--border)"><h5 class="modal-title">Create invoice</h5><button class="btn-close btn-close-white" data-bs-dismiss="modal" type="button"></button></div><div class="modal-body"><label class="form-label">Customer name</label><input class="form-control mb-3" id="newCustomer" required><label class="form-label">Item</label><input class="form-control mb-3" id="newItem" required><label class="form-label">Amount (EGP)</label><input class="form-control mb-3" id="newAmount" type="number" min="0" required><label class="form-label">Status</label><select class="form-select" id="newStatus"><option>Waiting</option><option>Delivered</option><option>Declined</option></select></div><div class="modal-footer" style="border-color:var(--border)"><button type="button" class="secondary" data-bs-dismiss="modal">Cancel</button><button class="primary">Create invoice</button></div></form></div></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const money=n=>($('currency')?.value||'EGP')+' '+Number(n).toLocaleString('en-US',{maximumFractionDigits:2});
+let invoices=[
+{id:5301,name:'Jacob Jones',item:'Caramel Latte',date:'Today',amount:530,status:'Waiting',email:'jacob@example.com'},
+{id:5300,name:'Syafannah San',item:'Cappuccino',date:'Today',amount:418,status:'Delivered',email:'syafannah@example.com'},
+{id:5299,name:'Robert Fox',item:'Coffee Combo',date:'Yesterday',amount:530,status:'Waiting',email:'robert@example.com'},
+{id:5298,name:'Cody Fisher',item:'Iced Americano',date:'Yesterday',amount:530,status:'Declined',email:'cody@example.com'}
+];
+let products=[
+{id:1,name:'Hot Beverage',category:'Coffee',price:150,stock:45,image: "images/WhatsApp Image 2026-05-04 at 4.34.55 AM.jpeg"},
+{id:2,name:'Iced Matcha',category:'Coffee',price:135,stock:30,image: "images/WhatsApp Image 2026-10-20 at 11.23.22 PM.jpeg"},
+{id:3,name:'Chocolate Frappuccino',category:'Coffee',price:110,stock:21,image: "images/WhatsApp Image 2026-10-20 at 11.01.24 PM.jpeg"},
+{id:4,name:'Chocolate Cake',category:'Cold Drinks',price:160,stock:30,image: "images/WhatsApp Image 2026-10-20 at 11.02.06 PM.jpeg"},
+{id:5,name:'Vanilla iced Latte',category:'Desserts',price:120,stock:12,image: "images/WhatsApp Image 2026-10-20 at 11.01.35 PM.jpeg"},
+{id:6,name:'cheesecake',category:'Food',price:85,stock:18,image: "images/WhatsApp Image 2026-10-20 at 11.27.08 PM.jpeg"}
+];
+let customers=[
+{name:'Jacob Jones',email:'jacob@example.com',orders:14,spent:3420},
+{name:'Syafannah San',email:'syafannah@example.com',orders:11,spent:2810},
+{name:'Robert Fox',email:'robert@example.com',orders:8,spent:2150},
+{name:'Cody Fisher',email:'cody@example.com',orders:5,spent:1230}
+];
+let staff=[{name:'Alex Morgan',role:'Store manager',status:'Online',icon:'AM'},{name:'Sarah Lee',role:'Barista',status:'Online',icon:'SL'},{name:'Daniel James',role:'Cashier',status:'On shift',icon:'DJ'}];
+let calendarDate=new Date();let events=[];
+let charts=[];
+function go(page){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===page));document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('topTitle').textContent=({dashboard:'Point of Sales Overview',analytics:'Sales Analytics',invoices:'Invoice Management',calendar:'Shop Calendar',products:'Products Management',customers:'Customer Directory',staff:'Staff Management',settings:'Settings'})[page]||page;$('breadcrumb').textContent=page.toUpperCase();if(innerWidth<761)closeSidebar();$('searchInput').value='';renderAll();}
+document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));
+function closeSidebar(){$('sidebar').classList.remove('show');$('overlay').classList.remove('show');}
+$('menuToggle').addEventListener('click',()=>{$('sidebar').classList.toggle('show');$('overlay').classList.toggle('show');});
+$('overlay').addEventListener('click',closeSidebar);
+function renderInvoices(){
+const q=($('invoiceSearch')?.value||'').toLowerCase(),f=$('invoiceFilter')?.value||'';
+const list=invoices.filter(i=>(i.name+' '+i.item+' '+i.id).toLowerCase().includes(q)&&(!f||i.status===f));
+const row=i=>`<tr><td>#${i.id}</td><td><div class="customer-cell"><div class="avatar">${i.name.split(' ').map(x=>x[0]).join('').slice(0,2)}</div>${i.name}</div></td><td>${i.item}</td><td>${i.date}</td><td>${money(i.amount)}</td><td><span class="status ${i.status==='Delivered'?'':i.status==='Waiting'?'waiting':'declined'}">${i.status}</span></td><td><select class="filter invoice-status" data-id="${i.id}"><option ${i.status==='Waiting'?'selected':''}>Waiting</option><option ${i.status==='Delivered'?'selected':''}>Delivered</option><option ${i.status==='Declined'?'selected':''}>Declined</option></select></td></tr>`;
+$('invoiceTable').innerHTML=list.length?list.map(row).join(''):'<tr><td colspan="7">No invoices found.</td></tr>';
+$('recentInvoices').innerHTML=invoices.slice(0,4).map(i=>`<tr><td>#${i.id}</td><td>${i.name}</td><td>${i.date}</td><td>${money(i.amount)}</td><td><span class="status ${i.status==='Delivered'?'':i.status==='Waiting'?'waiting':'declined'}">${i.status}</span></td></tr>`).join('');
+$('invoiceCount').textContent=invoices.length;$('paidCount').textContent=invoices.filter(i=>i.status==='Delivered').length;$('waitingCount').textContent=invoices.filter(i=>i.status==='Waiting').length;$('outstanding').textContent=money(invoices.filter(i=>i.status==='Waiting').reduce((s,i)=>s+i.amount,0));
+}
+function renderProducts(){const q=($('productSearch')?.value||'').toLowerCase(),c=$('productCategory')?.value||'';const list=products.filter(p=>(p.name+' '+p.category).toLowerCase().includes(q)&&(!c||p.category===c));$('productGrid').innerHTML=list.map(p=>`<div class="col-6 col-md-4 col-xl-3"><div class="product-card"><div style="height: 255px;background:#352216;display:grid;place-items:center;overflow:hidden;">${p. image ? `<img src="${p.image}" alt="${p.image}"style=width:90%;height:90%;object-fit:cover;">`:`<i class="fa-solid ${p.icon}"style="color:var(--orange);font-size:40px;"></i>`}</div><div class="product-info"><h3>${p.name}</h3><p>${p.category} · Stock: ${p.stock}</p><div class="d-flex justify-content-between align-items-center"><span class="product-price">${money(p.price)}</span><button class="secondary" onclick="editProduct(${p.id})">Edit</button></div></div></div></div>`).join('')||'<div class="col-12">No products found.</div>';}
+function renderCustomers(){const q=($('customerSearch')?.value||'').toLowerCase();$('customerTable').innerHTML=customers.filter(c=>(c.name+' '+c.email).toLowerCase().includes(q)).map(c=>`<tr><td>${c.name}</td><td>${c.email}</td><td>${c.orders}</td><td>${money(c.spent)}</td><td><span class="status">Regular</span></td></tr>`).join('');}
+function renderStaff(){$('staffGrid').innerHTML=staff.map(s=>`<div class="col-md-4"><div class="panel"><div class="d-flex align-items-center gap-3"><div class="avatar" style="width:42px;height:42px">${s.icon}</div><div><b>${s.name}</b><div style="color:var(--muted);font-size:10px;margin-top:5px">${s.role}</div></div></div><div class="mt-3"><span class="status">${s.status}</span></div></div></div>`).join('');}
+function renderStats(){$('ordersValue').textContent=(3048+invoices.length-4).toLocaleString();$('revenueValue').textContent=money(45462);$('analyticsRevenueValue').textContent=money(45462);$('analyticsOrders').textContent=(3048+invoices.length-4).toLocaleString();}
+function renderCharts(){charts.forEach(c=>c.destroy());charts=[];const common={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#24170f'}},scales:{x:{grid:{color:'#39271b'},ticks:{color:'#aa917b',font:{size:9}},border:{display:false}},y:{grid:{color:'#39271b'},ticks:{color:'#aa917b',font:{size:9}},border:{display:false}}}};charts.push(new Chart($('salesChart'),{type:'line',data:{labels:['08AM','10AM','11AM','12PM','1PM','2PM','3PM'],datasets:[{data:[120,180,240,320,290,210,160],borderColor:'#e9bd4d',backgroundColor:'#e9bd4d22',fill:true,tension:.35,pointBackgroundColor:'#f3961c',pointRadius:3}]},options:common}));charts.push(new Chart($('popularChart'),{type:'bar',data:{labels:['Cappuccino','Latte','Mocha','Americano'],datasets:[{data:[45,38,22,18],backgroundColor:['#e9bd4d','#dcae42','#bb8833','#f3961c'],borderRadius:4}]},options:{...common,scales:{...common.scales,y:{...common.scales.y,beginAtZero:true}}}}));charts.push(new Chart($('analyticsChart'),{type:'line',data:{labels:['May','Jun','Jul','Aug','Sep','Oct'],datasets:[{data:[32000,36500,34800,40200,42100,45462],borderColor:'#f3961c',backgroundColor:'#f3961c22',fill:true,tension:.35,pointBackgroundColor:'#e9bd4d'}]},options:common}));charts.push(new Chart($('categoryChart'),{type:'doughnut',data:{labels:['Coffee','Cold Drinks','Desserts'],datasets:[{data:[55,30,15],backgroundColor:['#e9bd4d','#f3961c','#8e5128'],borderColor:'#21150f',borderWidth:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{color:'#c5ad98',usePointStyle:true,boxWidth:7,font:{size:9}}}}}}));}
+function renderCalendar(){const y=calendarDate.getFullYear(),m=calendarDate.getMonth();$('calendarMonth').textContent=calendarDate.toLocaleDateString('en-US',{month:'long',year:'numeric'});$('calendarWeekdays').innerHTML=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div style="padding:8px;text-align:center;color:var(--muted)">${d}</div>`).join('');const start=new Date(y,m,1).getDay(),total=new Date(y,m+1,0).getDate();let html='';for(let i=0;i<start;i++)html+='<div></div>';for(let d=1;d<=total;d++){const today=new Date();const isToday=d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear();const ev=events.filter(e=>e.day===d&&e.month===m&&e.year===y);html+=`<div class="calendar-day ${isToday?'today':''}" onclick="calendarDay(${d})">${d}${ev.map(e=>`<div class="event">${e.title}</div>`).join('')}</div>`;}$('calendarDays').innerHTML=html;$('eventList').innerHTML=events.length?events.map(e=>`<div class="py-2 border-bottom" style="border-color:var(--border)!important">${e.title} — ${e.day} ${new Date(e.year,e.month).toLocaleDateString('en-US',{month:'short'})}</div>`).join(''):'No reminders added yet.';}
+function renderAll(){renderInvoices();renderProducts();renderCustomers();renderStaff();renderStats();renderCalendar();renderCharts();}
+$('invoiceSearch').addEventListener('input',renderInvoices);$('invoiceFilter').addEventListener('change',renderInvoices);$('productSearch').addEventListener('input',renderProducts);$('productCategory').addEventListener('change',renderProducts);$('customerSearch').addEventListener('input',renderCustomers);
+$('invoiceTable').addEventListener('change',e=>{if(!e.target.matches('.invoice-status'))return;const inv=invoices.find(i=>i.id===Number(e.target.dataset.id));if(inv){inv.status=e.target.value;renderInvoices();renderStats();}});
+function openInvoiceForm(){bootstrap.Modal.getOrCreateInstance($('invoiceModal')).show();}
+$('invoiceForm').addEventListener('submit',e=>{e.preventDefault();invoices.unshift({id:Math.max(...invoices.map(i=>i.id),5300)+1,name:$('newCustomer').value,item:$('newItem').value,date:'Today',amount:Number($('newAmount').value),status:$('newStatus').value,email:''});e.target.reset();bootstrap.Modal.getInstance($('invoiceModal')).hide();renderAll();go('invoices');});
+function addProduct(){const name=prompt('Product name:');if(!name)return;const price=Number(prompt('Price (EGP):','100'));if(!Number.isFinite(price)||price<0)return;products.push({id:Date.now(),name,category:prompt('Category: Coffee, Cold Drinks, Food or Desserts','Coffee')||'Coffee',price,stock:10,icon:'fa-mug-hot'});renderProducts();}
+function editProduct(id){const p=products.find(x=>x.id===id);if(!p)return;const price=prompt('Update price:',p.price);if(price===null)return;if(Number.isFinite(Number(price))&&Number(price)>=0)p.price=Number(price);const stock=prompt('Update stock:',p.stock);if(stock!==null&&Number.isFinite(Number(stock))&&Number(stock)>=0)p.stock=Number(stock);renderProducts();}
+function addCustomer(){const name=prompt('Customer name:');if(!name)return;const email=prompt('Customer email:','customer@example.com');if(!email)return;customers.push({name,email,orders:0,spent:0});renderCustomers();}
+function calendarDay(day){const title=prompt('Event for '+day+' '+calendarDate.toLocaleDateString('en-US',{month:'long'})+':');if(!title)return;events.push({title,day,month:calendarDate.getMonth(),year:calendarDate.getFullYear()});renderCalendar();}
+function addCalendarEvent(){calendarDay(new Date().getDate());}
+function changeMonth(delta){calendarDate.setMonth(calendarDate.getMonth()+delta);renderCalendar();}
+function askAssistant(topic){let q=topic||$('assistantInput').value.toLowerCase();let answer='Try asking about sales, products or orders.';if(q.includes('sale')||q.includes('revenue'))answer='Your sample dashboard shows EGP 45,462 in revenue. Coffee is the leading category.';else if(q.includes('product')||q.includes('best'))answer='Cappuccino is your top-selling sample item, followed by Latte and Mocha.';else if(q.includes('order')||q.includes('invoice'))answer='Open Invoices to review waiting, delivered and declined invoices.';$('assistantAnswer').textContent=answer;}
+function exportInvoices(){const rows=[['Invoice','Customer','Item','Date','Amount','Status'],...invoices.map(i=>[i.id,i.name,i.item,i.date,i.amount,i.status])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='coffee-invoices.csv';a.click();URL.revokeObjectURL(url);}
+$('notificationBtn').addEventListener('click',()=>alert(invoices.filter(i=>i.status==='Waiting').length+' invoices are waiting.'));
+$('settingsForm').addEventListener('submit',e=>{e.preventDefault();$('sideShopName')?.textContent;$('settingsMessage').textContent='Preferences updated for this page.';});
+$('searchInput').addEventListener('input',e=>{const q=e.target.value.toLowerCase();const active=document.querySelector('.page.active');active.querySelectorAll('tbody tr,.product-card').forEach(el=>el.style.display=el.textContent.toLowerCase().includes(q)?'':'none');});
+renderAll();
+</script>
+</body>
+</html>
